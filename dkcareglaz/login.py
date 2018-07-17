@@ -80,8 +80,9 @@ def _authenticate():
             return REGISTER.format(user=login, pass_=pass_)
         real_name = bytes(map(ord, real_name)).decode('utf-8')
         if password != pass_:
-            return '<html><head><title>{registration}</title></head><body><h3>'\
-                   '{diff_passwords}!</h3></body></html>'
+            return file("diff_passwords.html", 403)
+#               '<html><head><title>{registration}</title></head><body><h3>'\
+#               '{diff_passwords}!</h3></body></html>'
         with open('users/{}.pass'.format(login), 'w') as f:
             f.write(hash)
         with open('users/{}.real_name'.format(login), 'w') as f:
