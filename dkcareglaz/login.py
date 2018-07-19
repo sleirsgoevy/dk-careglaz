@@ -88,8 +88,8 @@ def _authenticate():
         with open('users/{}.real_name'.format(login), 'w') as f:
             f.write(real_name)
     t = str(time())
-    with open('sessions/'+t, 'w') as file:
-        file.write(login+':'+hash)
+    with open('sessions/'+t, 'w') as f:
+        f.write(login+':'+hash)
     response.set_cookie('credentials', t, path="/")
 
 @post('/login/<sheet>')
