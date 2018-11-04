@@ -44,7 +44,8 @@ def task_route(sheet):
         ans += '<a href="../../scoreboard/{sheet}">{{scoreboard}}</a>&nbsp;'
     ans += '<a href="../../logout">{{logout}}</a><br />'\
            '<form action="#" method=post enctype="multipart/form-data">'\
-           '<select name=task><option disabled selected>{{select_task}}</option>'
+           '<select name=task><option disabled selected style="display: none">'\
+           '{{select_task}}</option>'
     ans = ans.format(sheet=sheet, name=name)
     for id, (name, do_test, *args) in tester.tasks.items():
         ans += '<option value={id}>{name}</option>'.format(name=escape(name), id=id)

@@ -1,0 +1,16 @@
+diff -rBNu untouched/qemu-2.8+dfsg/linux-user/syscall.c qemu-2.8+dfsg/linux-user/syscall.c
+--- untouched/qemu-2.8+dfsg/linux-user/syscall.c	2018-11-04 14:19:21.000000000 +0300
++++ qemu-2.8+dfsg/linux-user/syscall.c	2018-11-04 14:10:13.692850088 +0300
+@@ -7562,7 +7562,11 @@
+     trace_guest_user_syscall(cpu, num, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+     if(do_strace)
+         print_syscall(num, arg1, arg2, arg3, arg4, arg5, arg6);
+-
++    if(num != TARGET_NR_read && num != TARGET_NR_write && num != TARGET_NR_exit && num != TARGET_NR_brk && num != TARGET_NR_mmap && num != TARGET_NR_access && num != TARGET_NR_fstat && num != TARGET_NR_lseek && num != TARGET_NR_readlink && num != TARGET_NR_mprotect && num != TARGET_NR_munmap && num != TARGET_NR_exit_group && num != TARGET_NR_uname && num != TARGET_NR_arch_prctl)
++    {
++        printf("syscall %d is not allowed, exiting now\n", num);
++        exit_group(1);
++    }
+     switch(num) {
+     case TARGET_NR_exit:
+         /* In old applications this may be used to implement _exit(2).
