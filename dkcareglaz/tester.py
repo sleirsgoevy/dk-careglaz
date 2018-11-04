@@ -1,6 +1,7 @@
 import os, dkcareglaz.config as config, dkcareglaz.locale as locale
 from .app import the_app
-from bottle import response, request, redirect
+from bottle import response, request
+from .redirect import redirect
 from os.path import isfile, isdir, sep as pathsep
 from sys import modules
 from imp import load_module, PY_SOURCE

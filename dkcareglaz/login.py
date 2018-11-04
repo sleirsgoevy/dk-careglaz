@@ -1,6 +1,7 @@
 import dkcareglaz.config as config, dkcareglaz.locale as locale
 from .app import the_app
-from bottle import request, response, redirect
+from bottle import request, response
+from .redirect import redirect
 from os.path import isfile
 from os import unlink
 from re import compile as re_compile
