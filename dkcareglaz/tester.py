@@ -1,5 +1,6 @@
 import os, dkcareglaz.config as config, dkcareglaz.locale as locale
-from bottle import route, post, response, request, redirect
+from .app import the_app
+from bottle import response, request, redirect
 from os.path import isfile, isdir, sep as pathsep
 from sys import modules
 from imp import load_module, PY_SOURCE
@@ -19,7 +20,7 @@ def import_tester(name):
     modules[modname] = ans
     return ans
 
-@route('/submit/<sheet>')
+@the_app.route('/submit/<sheet>')
 def task_route(sheet):
     if pathsep in sheet or not isfile('tasksheets/{}/tester.py'.format(sheet)):
         return file("forbidden.html", 403)
@@ -54,7 +55,7 @@ def task_route(sheet):
     response.set_cookie('credentials', credentials, max_age=86400)
     return ans.format(**locale.get_locale())
 
-@post('/submit/<sheet>')
+@the_app.post('/submit/<sheet>')
 def task_sumbit(sheet):
     credentials = request.get_cookie('credentials', default='invalid')
     if credentials == 'invalid':
@@ -96,7 +97,7 @@ def tester_thread(tester0, task_desc, solution_id, ext='cpp'):
         finally:
             with open('submissions/{}.finished'.format(solution_id), 'w'): pass
 
-@route('/result/<id>')
+@the_app.route('/result/<id>')
 def do_show_result(id):
     credentials = request.get_cookie('credentials', default='invalid')
     if credentials == 'invalid':
@@ -204,7 +205,7 @@ def show_ok(log, wa):
     else: log.write('<font color=red>WRONG ANSWER</font>\n')
     return wa
 
-@route('/submissions/<sheet>')
+@the_app.route('/submissions/<sheet>')
 def view_submissions(sheet):
     credentials = request.get_cookie('credentials', default='invalid')
     if credentials == 'invalid':

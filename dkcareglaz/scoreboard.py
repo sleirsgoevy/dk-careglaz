@@ -1,7 +1,8 @@
 import dkcareglaz.config as config, dkcareglaz.locale as locale
 from os import listdir
 from os.path import isfile, isdir, sep as pathsep
-from bottle import route, response, request
+from .app import the_app
+from bottle import response, request
 from .login import authenticate
 from collections import defaultdict
 from .tester import import_tester
@@ -44,7 +45,7 @@ def format_user(user, tasks, all_tasks):
     ans += '</tr>'
     return ans
 
-@route('/scoreboard/<sheet>')
+@the_app.route('/scoreboard/<sheet>')
 def scoreboard(sheet):
     if pathsep in sheet or not isdir('scoreboard/'+sheet) or not config.allow_scoreboard:
         return file("forbidden.html", 403)

@@ -3,8 +3,9 @@ from bottle import route, app
 from os import listdir
 from html import escape
 import dkcareglaz.login, dkcareglaz.shower, dkcareglaz.tester, dkcareglaz.scoreboard
+from .app import the_app as application
 
-@route('/')
+@application.route('/')
 def dkcareglaz():
     if not config.allow_main_page:
         return shower.file("forbidden.html", 403)
@@ -27,5 +28,3 @@ def dkcareglaz():
     ans += '</table></body></html>'
 #   print(ans)
     return ans.format(**locale.get_locale())
-
-application = app()

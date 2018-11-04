@@ -1,5 +1,6 @@
 import dkcareglaz.config as config, dkcareglaz.locale as locale
-from bottle import route, post, request, response, redirect
+from .app import the_app
+from bottle import request, response, redirect
 from os.path import isfile
 from os import unlink
 from re import compile as re_compile
@@ -50,8 +51,8 @@ number = re_compile('^[0-9]+(.[0-9]*)?$')
 LOGIN = open("login.html").read()
 REGISTER = open("register.html").read()
 
-@route('/login/<id>')
-@route('/login-result/<id>')
+@the_app.route('/login/<id>')
+@the_app.route('/login-result/<id>')
 def login(id):
     return LOGIN
 
@@ -92,11 +93,11 @@ def _authenticate():
         f.write(login+':'+hash)
     response.set_cookie('credentials', t, path="/")
 
-@post('/login/<sheet>')
+@the_app.post('/login/<sheet>')
 def do_login(sheet):
     return _authenticate() or redirect("../../submit/"+sheet)
 
-@post('/login-result/<id>')
+@the_app.post('/login-result/<id>')
 def do_login_result(id):
     return _authenticate() or redirect("../../result/"+sheet)
 
@@ -116,7 +117,7 @@ def authenticate(t):
         return user
     return None
 
-@route('/logout')
+@the_app.route('/logout')
 def logout():
     response.set_cookie('credentials', 'invalid')
     return redirect(config.redirect_on_logout)
