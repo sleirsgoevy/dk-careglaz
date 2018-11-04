@@ -27,7 +27,7 @@ def task_route(sheet):
         return file("forbidden.html", 403)
     credentials = request.get_cookie('credentials', default='invalid')
     if credentials == 'invalid':
-        return redirect("../login/"+sheet)
+        return redirect("../../login/"+sheet)
     if not authenticate(credentials):
         return file("login_error.html", 401, True)
 #       response.status = 403
@@ -60,7 +60,7 @@ def task_route(sheet):
 def task_sumbit(sheet):
     credentials = request.get_cookie('credentials', default='invalid')
     if credentials == 'invalid':
-        return redirect("../login/"+sheet)
+        return redirect("../../login/"+sheet)
     user = authenticate(credentials)
     if not user:
         return file("login_error.html", 401, True)
@@ -81,7 +81,7 @@ def task_sumbit(sheet):
         f.write(solution_id+' '+task+'\n')
     save_solution(solution, solution_id)
     Thread(target=tester_thread, args=(tester, tester.tasks[task], solution_id, solution.raw_filename.split('.')[-1])).start()
-    return redirect("../result/"+solution_id)
+    return redirect("../../result/"+solution_id)
 
 def tester_thread(tester0, task_desc, solution_id, ext='cpp'):
     tester = task_desc[1]
@@ -210,7 +210,7 @@ def show_ok(log, wa):
 def view_submissions(sheet):
     credentials = request.get_cookie('credentials', default='invalid')
     if credentials == 'invalid':
-        return redirect("../login-result/"+sheet)
+        return redirect("../../login-result/"+sheet)
 #       response.status = 302
 #       response['Location'] = 'https://newsgoevy.pythonanywhere.com/dk-careglaz/login-result/'+id
 #       return ''
