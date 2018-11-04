@@ -57,9 +57,9 @@ def scoreboard(sheet):
     ans = '<html><head><title>{{scoreboard}} - {name}</title></head><body>'\
           '<h3>{{scoreboard}} - {name}</h3>'.format(name=escape(name))
     if authenticate(request.get_cookie('credentials', default='invalid')):
-        ans += '<a href="../../submit/{sheet}">{{submit_sol}}</a>&nbsp;'\
-               '<a href="../../submissions/{sheet}">{{yours}}</a>&nbsp;'\
-               '<a href="../../logout">{{logout}}</a><br />'.format(sheet=sheet)
+        ans += '<a href="../submit/{sheet}">{{submit_sol}}</a>&nbsp;'\
+               '<a href="../submissions/{sheet}">{{yours}}</a>&nbsp;'\
+               '<a href="../logout">{{logout}}</a><br />'.format(sheet=sheet)
     ans += '<table cellspacing=0 border=1><tr><td></td>'
     user_scores = [get_user_score(sheet, user) for user in listdir('scoreboard/'+sheet)]
     user_scores.sort(key=lambda x: x[0])

@@ -27,7 +27,7 @@ def task_route(sheet):
         return file("forbidden.html", 403)
     credentials = request.get_cookie('credentials', default='invalid')
     if credentials == 'invalid':
-        return redirect("../../login/"+sheet)
+        return redirect("../login/"+sheet)
     if not authenticate(credentials):
         return file("login_error.html", 401, True)
 #       response.status = 403
@@ -41,10 +41,10 @@ def task_route(sheet):
     tester = import_tester(sheet)
     with open('tasksheets/{}/name.txt'.format(sheet)) as f: name = f.readline().strip()
     ans = '<html><head><title>{{submit_sol}} - {name}</title></head><body>'\
-          '<a href="../../submissions/{sheet}">{{submissions}}</a>&nbsp;'
+          '<a href="../submissions/{sheet}">{{submissions}}</a>&nbsp;'
     if config.allow_scoreboard:
-        ans += '<a href="../../scoreboard/{sheet}">{{scoreboard}}</a>&nbsp;'
-    ans += '<a href="../../logout">{{logout}}</a><br />'\
+        ans += '<a href="../scoreboard/{sheet}">{{scoreboard}}</a>&nbsp;'
+    ans += '<a href="../logout">{{logout}}</a><br />'\
            '<form action="#" method=post enctype="multipart/form-data">'\
            '<select name=task><option disabled selected style="display: none">'\
            '{{select_task}}</option>'
@@ -60,7 +60,7 @@ def task_route(sheet):
 def task_sumbit(sheet):
     credentials = request.get_cookie('credentials', default='invalid')
     if credentials == 'invalid':
-        return redirect("../../login/"+sheet)
+        return redirect("../login/"+sheet)
     user = authenticate(credentials)
     if not user:
         return file("login_error.html", 401, True)
@@ -81,7 +81,7 @@ def task_sumbit(sheet):
         f.write(solution_id+' '+task+'\n')
     save_solution(solution, solution_id)
     Thread(target=tester_thread, args=(tester, tester.tasks[task], solution_id, solution.raw_filename.split('.')[-1])).start()
-    return redirect("../../result/"+solution_id)
+    return redirect("../result/"+solution_id)
 
 def tester_thread(tester0, task_desc, solution_id, ext='cpp'):
     tester = task_desc[1]
@@ -103,7 +103,7 @@ def do_show_result(id):
     credentials = request.get_cookie('credentials', default='invalid')
     if credentials == 'invalid':
         response.status = 302
-        response['Location'] = '../../login-result/'+id
+        response['Location'] = '../login-result/'+id
         return ''
     user = authenticate(credentials)
     if not user:
@@ -135,7 +135,7 @@ def show_result(id):
                ';}}}}, 1000)</script>'\
                '</body></html>'.format(id=id).format(**locale.get_locale())
     ans = '<html><head><title>{{protocol}}{}</title></head><body>'\
-          '<a href="../../logout">{{logout}}</a><br /><pre>\n'.format(id)
+          '<a href="../logout">{{logout}}</a><br /><pre>\n'.format(id)
     with open('submissions/{}.log'.format(id)) as file:
         ans += file.read().replace('{', '{{').replace('}', '}}')
     ans += '\n</pre></body></html>'
@@ -210,7 +210,7 @@ def show_ok(log, wa):
 def view_submissions(sheet):
     credentials = request.get_cookie('credentials', default='invalid')
     if credentials == 'invalid':
-        return redirect("../../login-result/"+sheet)
+        return redirect("../login-result/"+sheet)
 #       response.status = 302
 #       response['Location'] = 'https://newsgoevy.pythonanywhere.com/dk-careglaz/login-result/'+id
 #       return ''
@@ -227,16 +227,16 @@ def view_submissions(sheet):
 #       return '<html><head><title>Протокол</title></head><body><h3>'\
 #              'Замечание для умных</h3><p>Не пытайтесь меня крякнуть!</p></body></html>'
     ans = '<html><head><title>{{yours}}</title></head><body>'\
-          '<a href="../../submit/{sheet}">{{submit_sol}}</a>&nbsp;'
+          '<a href="../submit/{sheet}">{{submit_sol}}</a>&nbsp;'
     if config.allow_scoreboard:
-        ans += '<a href="../../scoreboard/{sheet}">{{scoreboard}}</a>&nbsp;'
-    ans += '<a href="../../logout">{{logout}}</a><br />'
+        ans += '<a href="../scoreboard/{sheet}">{{scoreboard}}</a>&nbsp;'
+    ans += '<a href="../logout">{{logout}}</a><br />'
     ans = ans.format(sheet=sheet)
     if isfile('scoreboard/{sheet}/{user}'.format(sheet=sheet, user=user)):
         with open('scoreboard/{sheet}/{user}'.format(sheet=sheet, user=user)) as f:
             for line in f:
                 i, task = line.split()
-                ans += '<a href="../../result/{i}">{{solution}}{i} ({{task}} {task})</a><br />'.format(i=i, task=task)
+                ans += '<a href="../result/{i}">{{solution}}{i} ({{task}} {task})</a><br />'.format(i=i, task=task)
     ans += '</body></html>'
     return ans.format(**locale.get_locale())
 
