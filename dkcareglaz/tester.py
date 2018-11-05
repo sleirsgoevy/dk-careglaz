@@ -241,5 +241,4 @@ def view_submissions(sheet):
     return ans.format(**locale.get_locale())
 
 def superstrip(s):
-    while ' \n' in s: s = s.replace(' \n', '\n')
-    return s
+    return '\n'.join(map(str.rstrip, s.split('\n')))

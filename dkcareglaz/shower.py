@@ -1,12 +1,13 @@
 from .app import the_app
 from bottle import static_file, response
 from os.path import isfile, sep as pathsep, split as pathsplit
+from . import __path__ as pkg_path
 
 def file(path, error=200, kick=False):
     if kick:
         response.set_cookie('credentials', 'invalid')
     response.status = error
-    return static_file(path, pathsplit(__path__[0])[0])
+    return static_file(path, pathsplit(pkg_path[0])[0])
 
 @the_app.route('/theory/<name>')
 def theory(name):
