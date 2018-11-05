@@ -53,7 +53,7 @@ def task_route(sheet):
         ans += '<option value={id}>{name}</option>'.format(name=escape(name), id=id)
     ans += '</select><input type=file name=solution /><input type=submit value="Отправить!" />'\
            '</form></body></html>'
-    response.set_cookie('credentials', credentials, max_age=86400)
+    response.set_cookie('credentials', credentials, max_age=86400, path="/")
     return ans.format(**locale.get_locale())
 
 @the_app.post('/submit/<sheet>')

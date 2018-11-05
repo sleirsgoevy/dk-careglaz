@@ -92,7 +92,7 @@ def _authenticate():
     t = str(time())
     with open('sessions/'+t, 'w') as f:
         f.write(login+':'+hash)
-    response.set_cookie('credentials', t, path="/")
+    response.set_cookie('credentials', t, max_age=86400, path="/")
 
 @the_app.post('/login/<sheet>')
 def do_login(sheet):
@@ -120,5 +120,5 @@ def authenticate(t):
 
 @the_app.route('/logout')
 def logout():
-    response.set_cookie('credentials', 'invalid')
+    response.set_cookie('credentials', 'invalid', path="/")
     return redirect(config.redirect_on_logout)

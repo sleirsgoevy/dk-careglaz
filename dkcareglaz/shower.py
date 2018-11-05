@@ -5,7 +5,7 @@ from . import __path__ as pkg_path
 
 def file(path, error=200, kick=False):
     if kick:
-        response.set_cookie('credentials', 'invalid')
+        response.set_cookie('credentials', 'invalid', path="/")
     response.status = error
     return static_file(path, pathsplit(pkg_path[0])[0])
 
