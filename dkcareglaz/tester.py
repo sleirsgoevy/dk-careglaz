@@ -8,7 +8,7 @@ from imp import load_module, PY_SOURCE
 from html import escape
 from .login import authenticate
 from subprocess import Popen, call, PIPE, TimeoutExpired
-from threading import Thread
+from threading import Thread, Lock
 from .shower import file
 
 def import_tester(name):
@@ -142,10 +142,13 @@ def show_result(id):
     return ans.format(**locale.get_locale())
 
 def get_solution_id(user):
-    with open('submissions/id.txt') as file: id = str(int(file.readline())+1)
-    with open('submissions/id.txt', 'w') as file: file.write(id)
+    with get_solution_id.lock:
+        with open('submissions/id.txt') as file: id = str(int(file.readline())+1)
+        with open('submissions/id.txt', 'w') as file: file.write(id)
     with open('submissions/{}.user'.format(id), 'w') as file: file.write(user)
     return id
+
+get_solution_id.lock = Lock()
 
 def save_solution(upload, id):
     upload.save('submissions/{}.src'.format(id))
