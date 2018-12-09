@@ -1,8 +1,8 @@
-import os.path, subprocess, tempfile
+import os.path, subprocess, tempfile, collections
 from dkcareglaz.tester import run_solution, show_ok, superstrip
 
 def prepare_contest(dir):
-    return {task: (task, prepare_task(dir+'/'+task)) for task in os.listdir(dir) if os.path.isdir(dir+'/'+task)}
+    return collections.OrderedDict((task, (task, prepare_task(dir+'/'+task))) for task in sorted(os.listdir(dir)) if os.path.isdir(dir+'/'+task))
 
 def prepare_task(dir):
     build_tester(dir)
