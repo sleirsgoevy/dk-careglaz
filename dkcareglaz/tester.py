@@ -80,7 +80,10 @@ def task_sumbit(sheet):
     with open('scoreboard/{sheet}/{user}'.format(sheet=sheet, user=user), 'a') as f:
         f.write(solution_id+' '+task+'\n')
     save_solution(solution, solution_id)
-    Thread(target=tester_thread, args=(tester, tester.tasks[task], solution_id, solution.raw_filename.split('.')[-1])).start()
+    if hasattr(tester_thread, 'executor'):
+        tester_thread.executor.submit(tester_thread, tester, tester.tasks[task], solution_id, solution.raw_filename.split('.')[-1])
+    else:
+        Thread(target=tester_thread, args=(tester, tester.tasks[task], solution_id, solution.raw_filename.split('.')[-1])).start()
     return redirect("../../result/"+solution_id)
 
 def tester_thread(tester0, task_desc, solution_id, ext='cpp'):
@@ -97,6 +100,10 @@ def tester_thread(tester0, task_desc, solution_id, ext='cpp'):
             log.write('<font color=red>{}</font>'.format(escape(''.join(traceback.format_exception(*sys.exc_info())))))
         finally:
             with open('submissions/{}.finished'.format(solution_id), 'w'): pass
+
+if config.testing_thread_limit != None:
+    import concurrent.futures
+    tester_thread.executor = concurrent.futures.ThreadPoolExecutor(config.testing_thread_limit)
 
 @the_app.route('/result/<id>')
 def do_show_result(id):
