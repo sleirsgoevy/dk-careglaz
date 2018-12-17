@@ -177,9 +177,9 @@ def compile_solution(id, log, *, cmd="bash compile.sh %(src)s %(dst)s %(ext)s", 
     log.write('<font color=green>Compilation succeeded!</font>\n')
     return (elf, p.stdout.read().decode('utf-8'))
 
-def run_solution(elf, input, log, name, do_superstrip = True, timeout=1):
+def run_solution(elf, input, log, name, do_superstrip = True, timeout=1, encoding='utf-8'):
     log.write(escape(name)+' ... ')
-    input = input.encode('utf-8')
+    input = input.encode(encoding)
     popen = Popen(elf, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
     try:
         popen.stdin.write(input)
@@ -195,7 +195,7 @@ def run_solution(elf, input, log, name, do_superstrip = True, timeout=1):
         log.write('<font color=red>RUNTIME ERROR</font>'\
                   ' (exit code {})\n'.format(exitcode))
         normal = False
-    out = popen.stdout.read().decode('utf-8', 'replace')
+    out = popen.stdout.read().decode(encoding, 'replace')
     if do_superstrip:
         out = superstrip(out)
     return (normal,
