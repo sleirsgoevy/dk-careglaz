@@ -100,7 +100,7 @@ def do_login(sheet):
 
 @the_app.post('/login-result/<id>')
 def do_login_result(id):
-    return _authenticate() or redirect("../../result/"+sheet)
+    return _authenticate() or redirect("../../result/"+id)
 
 def authenticate(t):
     if number.match(t) == None:
