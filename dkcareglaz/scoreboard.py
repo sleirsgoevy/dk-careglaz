@@ -32,7 +32,7 @@ def get_user_score(sheet, user):
 
 def format_user(user, tasks, all_tasks):
     ans = ''
-    for task in sorted(all_tasks):
+    for task in all_tasks:
         ans += '<td'
         if tasks[task] > 0:
             ans += ' bgColor=lime>+'
