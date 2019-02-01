@@ -138,7 +138,7 @@ def do_show_result(id):
 def show_result(id):
     if not isfile('submissions/{}.finished'.format(id)):
         return '<html><head><title>{{protocol}}{id}</title></head><body>'\
-               '<a href="javascript:window.back()">{{back}}</a>'\
+               '<a href="javascript:history.back()">{{back}}</a>&nbsp;'\
                '<a href="/dk-careglaz/logout">{{logout}}</a><br />'\
                '<p>{{not_finished}}</p>'\
                '<script>setTimeout(function(){{{{'\
