@@ -73,7 +73,7 @@ def task_sumbit(sheet):
 #       return '<html><head><title>Сдать задачу</title></head><body><h3>'\
 #              'Замечание для умных</h3><p>Не пытайтесь меня крякнуть!</p></body></html>'
     tester = import_tester(sheet)
-    task = request.forms.get('task')
+    task = request.forms.getunicode('task')
     if task not in tester.tasks:
         return file("forbidden.html", 403)
     solution = request.files.get('solution')
