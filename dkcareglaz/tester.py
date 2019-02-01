@@ -138,6 +138,7 @@ def do_show_result(id):
 def show_result(id):
     if not isfile('submissions/{}.finished'.format(id)):
         return '<html><head><title>{{protocol}}{id}</title></head><body>'\
+               '<a href="javascript:window.back()">{{back}}</a>'\
                '<a href="/dk-careglaz/logout">{{logout}}</a><br />'\
                '<p>{{not_finished}}</p>'\
                '<script>setTimeout(function(){{{{'\
@@ -145,6 +146,7 @@ def show_result(id):
                ';}}}}, 1000)</script>'\
                '</body></html>'.format(id=id).format(**locale.get_locale())
     ans = '<html><head><title>{{protocol}}{}</title></head><body>'\
+          '<a href="javascript:window.back()">{{back}}</a>'\
           '<a href="../logout">{{logout}}</a><br /><pre>\n'.format(id)
     with open('submissions/{}.log'.format(id)) as file:
         ans += file.read().replace('{', '{{').replace('}', '}}')
@@ -256,7 +258,7 @@ def view_submissions(sheet):
 def superstrip(s):
     return '\n'.join(map(str.rstrip, s.split('\n')))
 
-def compile_output_only(id, log, *, ext=None):
+def compile_output_only(id, log, *, ext=None, encoding='utf-8'):
     source = 'submissions/{}.src'.format(id)
-    import shlex
-    return (None, 'cat '+shlex.quote(source))
+    with open(source, encoding=encoding) as file:
+        return (None, file.read())
