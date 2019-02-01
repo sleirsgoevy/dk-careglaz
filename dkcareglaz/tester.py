@@ -44,12 +44,15 @@ def task_route(sheet):
           '<a href="../submissions/{sheet}">{{submissions}}</a>&nbsp;'
     if config.allow_scoreboard:
         ans += '<a href="../scoreboard/{sheet}">{{scoreboard}}</a>&nbsp;'
-    ans += '<a href="../logout">{{logout}}</a><br />'\
-           '<form action="#" method=post enctype="multipart/form-data">'\
+    ans += '<a href="../logout">{{logout}}</a><br />'
+    if hasattr(tester, 'intro'):
+        ans += tester.intro
+    ans += '<form action="#" method=post enctype="multipart/form-data">'\
            '<select name=task><option disabled selected style="display: none">'\
            '{{select_task}}</option>'
     ans = ans.format(sheet=sheet, name=name)
     for id, (name, do_test, *args) in tester.tasks.items():
+        if args and args[0].get('hidden', False): continue
         ans += '<option value={id}>{name}</option>'.format(name=escape(name), id=id)
     ans += '</select><input type=file name=solution /><input type=submit value="Отправить!" />'\
            '</form></body></html>'
@@ -88,11 +91,11 @@ def task_sumbit(sheet):
 
 def tester_thread(tester0, task_desc, solution_id, ext='cpp'):
     tester = task_desc[1]
-    compiler = task_desc[2] if len(task_desc) > 2 else getattr(tester, 'compile_solution', compile_solution)
+    compiler = task_desc[2]['compiler'] if len(task_desc) > 2 else getattr(tester, 'compile_solution', compile_solution)
     with open('submissions/{}.log'.format(solution_id), 'w') as log:
         try:
             elf, cmd = compiler(solution_id, log, ext=ext)
-            if elf != None and tester(cmd, log):
+            if (elf != None or cmd != None) and tester(cmd, log):
                 with open('submissions/{}.ok'.format(solution_id), 'w'): pass
             if elf != None: os.unlink(elf)
         except:
@@ -252,3 +255,8 @@ def view_submissions(sheet):
 
 def superstrip(s):
     return '\n'.join(map(str.rstrip, s.split('\n')))
+
+def compile_output_only(id, log, *, ext=None):
+    source = 'submissions/{}.src'.format(id)
+    import shlex
+    return (None, 'cat '+shlex.quote(source))
