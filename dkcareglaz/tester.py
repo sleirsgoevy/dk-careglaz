@@ -146,7 +146,7 @@ def show_result(id):
                ';}}}}, 1000)</script>'\
                '</body></html>'.format(id=id).format(**locale.get_locale())
     ans = '<html><head><title>{{protocol}}{}</title></head><body>'\
-          '<a href="javascript:window.back()">{{back}}</a>'\
+          '<a href="javascript:history.back()">{{back}}</a>&nbsp;'\
           '<a href="../logout">{{logout}}</a><br /><pre>\n'.format(id)
     with open('submissions/{}.log'.format(id)) as file:
         ans += file.read().replace('{', '{{').replace('}', '}}')
