@@ -17,9 +17,9 @@ def test_offload(offload_setup, elf, log):
             if boundary in i: break
         else: break
     data = ('--'+boundary+'\r\n').join(data).encode('latin-1')
-    url, auth_token = urls.get()
+    url, sheet, auth_token = urls.get()
     try:
-        req = urllib.request.urlopen(urllib.request.Request(url+'/submit/test', data, {'Cookie': 'credentials='+auth_token, 'Content-Type': 'multipart/form-data; boundary='+boundary}))
+        req = urllib.request.urlopen(urllib.request.Request(url+'/submit/'+sheet, data, {'Cookie': 'credentials='+auth_token, 'Content-Type': 'multipart/form-data; boundary='+boundary}))
         assert req.getcode() == 200 and req.geturl().startswith(url+'/result/'), req.read()
         while True:
             req2 = urllib.request.urlopen(urllib.request.Request(req.geturl()+'/api', None, {'Cookie': 'credentials='+auth_token}, method='GET'))
@@ -31,7 +31,7 @@ def test_offload(offload_setup, elf, log):
         log.write(log_text)
         return status == 'ok'
     finally:
-        urls.put((url, auth_token))
+        urls.put((url, sheet, auth_token))
 
 def do_offload(tasks, urls):
     q = queue.Queue()
