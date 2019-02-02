@@ -12,7 +12,7 @@ from .shower import file
 correct = re_compile('^[a-zA-Z0-9_\-]+$')
 number = re_compile('^[0-9]+(.[0-9]*)?$')
 
-#LOGIN = """\
+#get_LOGIN() = """\
 #<html>
 #<head>
 #<title>Вход в систему</title>
@@ -29,7 +29,7 @@ number = re_compile('^[0-9]+(.[0-9]*)?$')
 #</html>
 #"""
 
-#REGISTER = """\
+#get_REGISTER() = """\
 #<html>
 #<head>
 #<title>Регистрация</title>
@@ -49,13 +49,16 @@ number = re_compile('^[0-9]+(.[0-9]*)?$')
 #</html>
 #"""
 
-LOGIN = open("login.html").read()
-REGISTER = open("register.html").read()
+def get_LOGIN():
+    with open("html/login.html") as file: return file.read()
+
+def get_REGISTER():
+    with open("html/register.html") as file: return file.read()
 
 @the_app.route('/login/<id>')
 @the_app.route('/login-result/<id>')
 def login(id):
-    return LOGIN
+    return get_LOGIN()
 
 def _authenticate():
     login = request.forms.get('user', default=None)
@@ -79,7 +82,7 @@ def _authenticate():
 #               response.status = 403
 #               return '<html><head><title>Вход в систему</title></head><body><h3>'\
 #                      'Замечание для умных</h3><p>Не пытайтесь меня крякнуть!</p></body></html>'
-            return REGISTER.format(user=login, pass_=pass_)
+            return get_REGISTER().format(user=login, pass_=pass_)
         real_name = bytes(map(ord, real_name)).decode('utf-8')
         if password != pass_:
             return file("diff_passwords.html", 403)

@@ -147,10 +147,10 @@ def do_show_result(id, api=False):
         return show_result(id)
 
 def do_check_result(id):
-    do_show_result(id, api=True)
+    return do_show_result(id, api=True)
 
 if config.auth_token != None:
-    the_app.route('/result/<id>/api', do_check_result)
+    the_app.route('/result/<id>/api')(do_check_result)
 
 def show_result(id):
     if not isfile('submissions/{}.finished'.format(id)):

@@ -4,7 +4,7 @@ from collections import OrderedDict
 def compile_offload(id, log, *, ext='txt'):
     source = 'submissions/{}.src'.format(id)
     with open(source, 'rb') as file:
-        return (file.read(), ext)
+        return (None, (file.read(), ext))
 
 def test_offload(offload_setup, elf, log):
     task, urls = offload_setup
@@ -16,37 +16,26 @@ def test_offload(offload_setup, elf, log):
         for i in data:
             if boundary in i: break
         else: break
-    data = ('--'+boundary).join(data).encode('latin-1')
+    data = ('--'+boundary+'\r\n').join(data).encode('latin-1')
     url, auth_token = urls.get()
-    try: req = urlib.request.urlopen(urllib.request.Request(url+'/submit/test', data, {'Cookie': 'credentials='+auth_token}))
-    except urllib.error.URLError as err: req = err
-    if req.getcode() != 200 or not req.geturl().startswith(url+'/result/'):
-        log.write('<font color=red>Unknown etwork error</font>\n')
-        try:
-            with os.popen('bash report.sh', 'w') as p:
-                print(req.geturl(), file=p)
-                print(repr(req.read()), file=p)
-                print(repr(data), file=p)
-        except: pass
-        return False
-    while True:
-        try: req2 = urllib.request.urlopen(req.geturl()+'/api')
-        except urllib.error.URLError as err: req2 = err
-        data = req2.read().decode('utf-8')
-        if data != 'not finished':
-            break
-    status, log_text = data.split('\n', 1)
-    if status not in ('ok', 'not ok'):
-        log.write('<font color=red>Unknown error</font>\n')
-        try:
-            with os.popen('bash report.sh', 'w') as p:
-                print(repr(data), file=p)
-        except: pass
-        return False
-    log.write(log_text)
-    return status == 'ok'
+    try:
+        req = urllib.request.urlopen(urllib.request.Request(url+'/submit/test', data, {'Cookie': 'credentials='+auth_token, 'Content-Type': 'multipart/form-data; boundary='+boundary}))
+        assert req.getcode() == 200 and req.geturl().startswith(url+'/result/'), req.read()
+        while True:
+            req2 = urllib.request.urlopen(urllib.request.Request(req.geturl()+'/api', None, {'Cookie': 'credentials='+auth_token}, method='GET'))
+            data = req2.read().decode('utf-8')
+            if data != 'not finished':
+                break
+        status, log_text = data.split('\n', 1)
+        assert status in ('ok', 'not ok'), repr(data)
+        log.write(log_text)
+        return status == 'ok'
+    finally:
+        urls.put((url, auth_token))
 
 def do_offload(tasks, urls):
+    q = queue.Queue()
+    for i in urls: q.put(i)
     if config.auth_token != None: return tasks
     ans = OrderedDict()
     for id, (name, tester, *options) in tasks.items():
@@ -54,7 +43,7 @@ def do_offload(tasks, urls):
             options = options[0]
         else:
             options = {}
-        tester = test_offload.__get__((id, urls))
+        tester = test_offload.__get__((id, q))
         options['compiler'] = compile_offload
         ans[id] = (name, tester, options)
     return ans
