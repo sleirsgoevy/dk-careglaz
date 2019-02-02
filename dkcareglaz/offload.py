@@ -47,7 +47,7 @@ def test_offload(offload_setup, elf, log):
     return status == 'ok'
 
 def do_offload(tasks, urls):
-    if config.auth_token == None: return tasks
+    if config.auth_token != None: return tasks
     ans = OrderedDict()
     for id, (name, tester, *options) in tasks.items():
         if options:
