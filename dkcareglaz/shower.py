@@ -3,7 +3,7 @@ from bottle import static_file, response
 from os.path import isfile, sep as pathsep, split as pathsplit
 from . import __path__ as pkg_path
 
-def file(path, error=200, kick=False, root=pathsplit(pkg_path[0])[0]):
+def file(path, error=200, kick=False, root="html"):
     if kick:
         response.set_cookie('credentials', 'invalid', path="/")
     response.status = error

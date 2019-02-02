@@ -103,6 +103,11 @@ def do_login_result(id):
     return _authenticate() or redirect("../../result/"+id)
 
 def authenticate(t):
+    if config.auth_token != None:
+        if t == config.auth_token:
+            return 'token'
+        else:
+            return None
     if number.match(t) == None:
         return None
     if not isfile('sessions/'+t):

@@ -109,7 +109,7 @@ if config.testing_thread_limit != None:
     tester_thread.executor = concurrent.futures.ThreadPoolExecutor(config.testing_thread_limit)
 
 @the_app.route('/result/<id>')
-def do_show_result(id):
+def do_show_result(id, api=False):
     credentials = request.get_cookie('credentials', default='invalid')
     if credentials == 'invalid':
         response.status = 302
@@ -133,7 +133,24 @@ def do_show_result(id):
 #           response.status = 403
 #           return '<html><head><title>Протокол</title><head><body><h3>'\
 #                  'Это не ваше решение</h3><p>Вы можете смотреть протокол только своих решений</p></body></html>'
-    return show_result(id)
+    if api:
+        response.set_header('Content-Type', 'text/plain')
+        if not isfile('submissions/{}.finished'.format(id)):
+            return 'not finished'
+        ans = 'not ok\n'
+        if isfile('submissions/{}.ok'.format(id)):
+            ans = 'ok\n'
+        with open('submissions/{}.log'.format(id)) as file:
+            ans += file.read()
+        return ans
+    else:
+        return show_result(id)
+
+def do_check_result(id):
+    do_show_result(id, api=True)
+
+if config.auth_token != None:
+    the_app.route('/result/<id>/api', do_check_result)
 
 def show_result(id):
     if not isfile('submissions/{}.finished'.format(id)):
@@ -142,8 +159,8 @@ def show_result(id):
                '<a href="/dk-careglaz/logout">{{logout}}</a><br />'\
                '<p>{{not_finished}}</p>'\
                '<script>setTimeout(function(){{{{'\
-               'document.location.href=document.location.href'\
-               ';}}}}, 1000)</script>'\
+               'document.location.href=document.location.href;'\
+               '}}}}, 1000)</script>'\
                '</body></html>'.format(id=id).format(**locale.get_locale())
     ans = '<html><head><title>{{protocol}}{}</title></head><body>'\
           '<a href="javascript:history.back()">{{back}}</a>&nbsp;'\
