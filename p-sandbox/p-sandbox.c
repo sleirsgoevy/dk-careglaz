@@ -24,22 +24,36 @@ struct sandb_syscall {
   void (*callback)(struct sandbox*, struct user_regs_struct *regs);
 };
 
+void sandb_eperm(struct sandbox* sandb, struct user_regs_struct* regs)
+{
+    regs->rax = regs->orig_rax = __NR_getpid;
+    ptrace(PTRACE_SETREGS, sandb->child, NULL, regs);
+    ptrace(PTRACE_SYSCALL, sandb->child, NULL, (void*)sandb->last_sig);
+    int status;
+    wait(&status);
+    ptrace(PTRACE_GETREGS, sandb->child, NULL, regs);
+    regs->rax = regs->orig_rax = -EPERM;
+    ptrace(PTRACE_SETREGS, sandb->child, NULL, regs);
+}
+
 struct sandb_syscall sandb_syscalls[] = {
   {__NR_read,            NULL},
   {__NR_write,           NULL},
   {__NR_exit,            NULL},
   {__NR_brk,             NULL},
   {__NR_mmap,            NULL},
-  {__NR_access,          NULL},
+  {__NR_access,          sandb_eperm},
   {__NR_fstat,           NULL},
   {__NR_lseek,           NULL},
-  {__NR_readlink,        NULL},
+  {__NR_readlink,        sandb_eperm},
   {__NR_mprotect,        NULL},
   {__NR_munmap,          NULL},
   {__NR_exit_group,      NULL},
   {__NR_uname,           NULL},
-  {__NR_arch_prctl,      NULL},
+  {__NR_arch_prctl,      NULL}, // thread-local storage
   {__NR_rt_sigaction,    NULL},
+  {__NR_getrlimit,       NULL},
+  {__NR_ioctl,           sandb_eperm},
 };
 
 void sandb_kill(struct sandbox *sandb) {
@@ -92,7 +106,7 @@ void sandb_init(struct sandbox *sandb, int argc, char **argv) {
     sandb->progname = argv[0];
     sandb->last_sig = 0;
     wait(NULL);
-    ptrace(PTRACE_SETOPTIONS, pid, NULL, PTRACE_O_EXITKILL);
+    //ptrace(PTRACE_SETOPTIONS, pid, NULL, PTRACE_O_EXITKILL);
   }
 }
 
@@ -125,7 +139,12 @@ void sandb_run(struct sandbox *sandb) {
     if(WSTOPSIG(status) == SIGTRAP)
       sandb_handle_syscall(sandb);
     else
+    {
       sandb->last_sig = WSTOPSIG(status);
+      ptrace(PTRACE_DETACH, sandb->child, 0, SIGSTOP);
+      printf("[SANDBOX] pid = %d", (int)sandb->child);
+      while(1);
+    }
   }
 }
 
