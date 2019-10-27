@@ -16,6 +16,7 @@
 struct sandbox {
   pid_t child;
   const char *progname;
+  int last_sig;
 };
 
 struct sandb_syscall {
@@ -37,7 +38,8 @@ struct sandb_syscall sandb_syscalls[] = {
   {__NR_munmap,          NULL},
   {__NR_exit_group,      NULL},
   {__NR_uname,           NULL},
-  {__NR_arch_prctl,      NULL}
+  {__NR_arch_prctl,      NULL},
+  {__NR_rt_sigaction,    NULL},
 };
 
 void sandb_kill(struct sandbox *sandb) {
@@ -88,6 +90,7 @@ void sandb_init(struct sandbox *sandb, int argc, char **argv) {
   } else {
     sandb->child = pid;
     sandb->progname = argv[0];
+    sandb->last_sig = 0;
     wait(NULL);
     ptrace(PTRACE_SETOPTIONS, pid, NULL, PTRACE_O_EXITKILL);
   }
@@ -96,7 +99,7 @@ void sandb_init(struct sandbox *sandb, int argc, char **argv) {
 void sandb_run(struct sandbox *sandb) {
   int status;
 
-  if(ptrace(PTRACE_SYSCALL, sandb->child, NULL, NULL) < 0) {
+  if(ptrace(PTRACE_SYSCALL, sandb->child, NULL, (void*)sandb->last_sig) < 0) {
     if(errno == ESRCH) {
       waitpid(sandb->child, &status, __WALL | WNOHANG);
       sandb_kill(sandb);
@@ -106,23 +109,41 @@ void sandb_run(struct sandbox *sandb) {
   }
 
   wait(&status);
+  sandb->last_sig = 0;
 
-  if(WIFEXITED(status))
-    exit(WEXITSTATUS(status)?EXIT_FAILURE:EXIT_SUCCESS);
+  if(WIFEXITED(status)) {
+    if(WEXITSTATUS(status))
+      errx(EXIT_FAILURE, "[SANDBOX] Exited with %d", WEXITSTATUS(status));
+    else
+      exit(EXIT_SUCCESS);
+  }
+
+  if(WIFSIGNALED(status))
+    errx(EXIT_FAILURE, "[SANDBOX] Terminated with signal %d", WTERMSIG(status));
 
   if(WIFSTOPPED(status)) {
-    sandb_handle_syscall(sandb);
+    if(WSTOPSIG(status) == SIGTRAP)
+      sandb_handle_syscall(sandb);
+    else
+      sandb->last_sig = WSTOPSIG(status);
   }
 }
 
+struct sandbox sandb;
+
+void handle_sigterm(int sig) {
+  sandb_kill(&sandb);
+  exit(1);
+}
+
 int main(int argc, char **argv) {
-  struct sandbox sandb;
 
   if(argc < 2) {
     errx(EXIT_FAILURE, "[SANDBOX] Usage : %s <elf> [<arg1...>]", argv[0]);
   }
 
   sandb_init(&sandb, argc-1, argv+1);
+  signal(SIGTERM, handle_sigterm);
 
   for(;;) {
     sandb_run(&sandb);

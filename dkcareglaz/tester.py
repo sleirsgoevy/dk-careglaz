@@ -182,7 +182,7 @@ get_solution_id.lock = Lock()
 def save_solution(upload, id):
     upload.save('submissions/{}.src'.format(id))
 
-def compile_solution(id, log, *, cmd="bash compile.sh %(src)s %(dst)s %(ext)s", ext='cpp', timeout=10):
+def compile_solution(id, log, *, cmd="bash compile.sh %(src)s %(dst)s %(ext)s", ext='cpp', timeout=60):
     source = 'submissions/{}.src'.format(id)
     elf = 'submissions/{}.elf'.format(id)
     try:
@@ -210,11 +210,12 @@ def run_solution(elf, input, log, name, do_superstrip = True, timeout=1, encodin
     normal = True
     try: out, err = popen.communicate(input, timeout=timeout)
     except TimeoutExpired:
-        popen.kill()
+        popen.terminate()
         log.write('<font color=red>TIMED OUT</font>\n')
         normal = False
         try: out, err = popen.communicate(timeout=0)
         except TimeoutExpired: out = err = b''
+        popen.kill()
     exitcode = popen.wait()
 #   except TimeoutExpired:
 #       popen.kill()

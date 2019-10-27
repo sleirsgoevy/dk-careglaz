@@ -7,8 +7,10 @@ def prepare_contest(dir, debug=False, timeouts={}):
 def prepare_task(dir, debug=False, timeout=1):
     if os.path.exists(dir+'/files/check.cpp'):
         build_tester(dir, dir+'/files')
-    else:
+    elif os.path.exists(dir+'/check.cpp'):
         build_tester(dir)
+    elif os.path.exists(dir+'/Check.java'):
+        build_java_tester(dir)
     return base_tester.__get__((dir, debug, timeout))
 
 def base_tester(params, elf, log):
@@ -46,3 +48,10 @@ def build_tester(dir, dir2=None):
                 dst.write(src.read())
         if subprocess.call(("g++", "--std=c++14", dir2+'/check.cpp', "-o", dir+'/check')):
             print("Failed to build tester, will use cmp-test")
+
+def build_java_tester(dir):
+    if not os.path.exists(dir+'/check'):
+        if subprocess.call(("javac", "-cp", "testlib4j.jar", dir+'/Check.java')):
+            print("Failed to build tester, will use cmp-test")
+        with open(dir+'/check', 'wb') as file:
+            file.write('java -cp "$(dirname "$0")" Check "$@"')
