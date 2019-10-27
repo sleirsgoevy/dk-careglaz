@@ -1,4 +1,4 @@
-import os, dkcareglaz.config as config, dkcareglaz.locale as locale
+import os, dkcareglaz.config as config, dkcareglaz.locale as locale, time
 from .app import the_app
 from bottle import response, request
 from .redirect import redirect
@@ -203,26 +203,35 @@ def run_solution(elf, input, log, name, do_superstrip = True, timeout=1, encodin
     log.write(escape(name)+' ... ')
     input = input.encode(encoding)
     popen = Popen(elf, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
-    try:
-        popen.stdin.write(input)
-        popen.stdin.close()
-    except OSError: pass
+#   try:
+#       popen.stdin.write(input)
+#       popen.stdin.close()
+#   except OSError: pass
     normal = True
-    try: exitcode = popen.wait(timeout=timeout)
+    try: out, err = popen.communicate(input, timeout=timeout)
     except TimeoutExpired:
         popen.kill()
         log.write('<font color=red>TIMED OUT</font>\n')
         normal = False
+        try: out, err = popen.communicate(timeout=0)
+        except TimeoutExpired: out = err = b''
+    exitcode = popen.wait()
+#   except TimeoutExpired:
+#       popen.kill()
+#       log.write('<font color=red>TIMED OUT</font>\n')
+#       normal = False
     if normal and exitcode:
         log.write('<font color=red>RUNTIME ERROR</font>'\
                   ' (exit code {})\n'.format(exitcode))
         normal = False
-    out = popen.stdout.read().decode(encoding, 'replace')
+#   out = popen.stdout.read().decode(encoding, 'replace')
+    out = out.decode(encoding, 'replace')
     if do_superstrip:
         out = superstrip(out)
     return (normal,
             out,
-            popen.stderr.read().decode('utf-8', 'replace'))
+#           popen.stderr.read().decode('utf-8', 'replace'))
+            err.decode('utf-8', 'replace'))
 
 def display_output(stdin, stdout, stderr, log):
     log.write('input test\n')

@@ -89,6 +89,7 @@ void sandb_init(struct sandbox *sandb, int argc, char **argv) {
     sandb->child = pid;
     sandb->progname = argv[0];
     wait(NULL);
+    ptrace(PTRACE_SETOPTIONS, pid, NULL, PTRACE_O_EXITKILL);
   }
 }
 
@@ -107,7 +108,7 @@ void sandb_run(struct sandbox *sandb) {
   wait(&status);
 
   if(WIFEXITED(status))
-    exit(WEXITSTATUS(status));
+    exit(WEXITSTATUS(status)?EXIT_FAILURE:EXIT_SUCCESS);
 
   if(WIFSTOPPED(status)) {
     sandb_handle_syscall(sandb);
