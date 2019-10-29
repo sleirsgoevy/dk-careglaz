@@ -1,16 +1,48 @@
-diff -rBNu untouched/qemu-2.8+dfsg/linux-user/syscall.c qemu-2.8+dfsg/linux-user/syscall.c
---- untouched/qemu-2.8+dfsg/linux-user/syscall.c	2018-11-04 14:19:21.000000000 +0300
-+++ qemu-2.8+dfsg/linux-user/syscall.c	2018-11-04 14:10:13.692850088 +0300
-@@ -7562,7 +7562,11 @@
-     trace_guest_user_syscall(cpu, num, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
-     if(do_strace)
-         print_syscall(num, arg1, arg2, arg3, arg4, arg5, arg6);
--
-+    if(num != TARGET_NR_read && num != TARGET_NR_write && num != TARGET_NR_exit && num != TARGET_NR_brk && num != TARGET_NR_mmap && num != TARGET_NR_access && num != TARGET_NR_fstat && num != TARGET_NR_lseek && num != TARGET_NR_readlink && num != TARGET_NR_mprotect && num != TARGET_NR_munmap && num != TARGET_NR_exit_group && num != TARGET_NR_uname && num != TARGET_NR_arch_prctl)
+diff -r -u untouched/qemu-3.1+dfsg/linux-user/syscall.c qemu-3.1+dfsg/linux-user/syscall.c
+--- untouched/qemu-3.1+dfsg/linux-user/syscall.c	2019-10-29 23:49:04.526692957 +0300
++++ qemu-3.1+dfsg/linux-user/syscall.c	2019-10-29 23:51:26.865960811 +0300
+@@ -6909,7 +6909,17 @@
+ #endif
+     void *p;
+ 
++    if(num != TARGET_NR_read && num != TARGET_NR_write && num != TARGET_NR_exit && num != TARGET_NR_brk && num != TARGET_NR_mmap && num != TARGET_NR_access && num != TARGET_NR_fstat && num != TARGET_NR_lseek && num != TARGET_NR_readlink && num != TARGET_NR_mprotect && num != TARGET_NR_munmap && num != TARGET_NR_exit_group && num != TARGET_NR_uname && num != TARGET_NR_arch_prctl && num != TARGET_NR_rt_sigaction && num != TARGET_NR_getrlimit && num != TARGET_NR_ioctl)
 +    {
 +        printf("syscall %d is not allowed, exiting now\n", num);
 +        exit_group(1);
 +    }
      switch(num) {
++    case TARGET_NR_access:
++    case TARGET_NR_readlink:
++    case TARGET_NR_ioctl:
++        ret = -EPERM;
++        break;
      case TARGET_NR_exit:
          /* In old applications this may be used to implement _exit(2).
+            However in threaded applictions it is used for thread termination,
+@@ -7405,7 +7415,7 @@
+         return ret;
+ #endif
+ #ifdef TARGET_NR_access
+-    case TARGET_NR_access:
++//  case TARGET_NR_access:
+         if (!(p = lock_user_string(arg1))) {
+             return -TARGET_EFAULT;
+         }
+@@ -7557,7 +7567,7 @@
+         unlock_user(p, arg1, 0);
+         return ret;
+ #endif
+-    case TARGET_NR_ioctl:
++//  case TARGET_NR_ioctl:
+         return do_ioctl(arg1, arg2, arg3);
+ #ifdef TARGET_NR_fcntl
+     case TARGET_NR_fcntl:
+@@ -8292,7 +8302,7 @@
+         return ret;
+ #endif
+ #ifdef TARGET_NR_readlink
+-    case TARGET_NR_readlink:
++//  case TARGET_NR_readlink:
+         {
+             void *p2;
+             p = lock_user_string(arg1);
