@@ -13,7 +13,7 @@ def dkcareglaz():
           '<table sellspacing=0 border=1>'
     ansl = []
     for i in listdir('tasksheets'):
-        if not os.path.exists('tasksheets/{}/name.txt'.format(i)): continue
+        if not os.path.exists('tasksheets/{}/sortid.txt'.format(i)): continue
         with open('tasksheets/{}/name.txt'.format(i)) as file:
             with open('tasksheets/{}/sortid.txt'.format(i)) as file2: sortid = int(file2.read())
             name = file.readline().strip()
